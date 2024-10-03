@@ -1,0 +1,31 @@
+Options -Indexes
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?/$1 [L,QSA] 
+</IfModule>
+<IfModule mod_rewrite.c>
+  Header add Access-Control-Allow-Origin "*"
+  Header add Access-Control-Allow-Methods: "GET,POST,OPTIONS,DELETE,PUT"
+  Header add Access-Control-Allow-Headers: "Authorization, Content-Type, Access-Control-Allow-Headers, X-Requested-Wit"
+
+  RewriteEngine on
+  RewriteBase /
+</IfModule>
+<ifModule mod_headers.c>
+    #establece toda tu configuración aquí
+    Header always set Access-Control-Allow-Headers "Authorization"
+</ifModule>
+ 
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
+<IfModule mod_security.c>
+SecRequestBodyNoFilesLimit 500242880
+SecRequestBodyAccess Off
+</IfModule>
+AddHandler fcgid-script .php 
+FCGIWrapper "/dh/cgi-system/php70.cgi" .php
