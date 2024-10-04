@@ -22,7 +22,7 @@ services:
   php-fpm:
     build:
       context: ../..
-      dockerfile: docker/dev-logiztik/Dockerfile
+      dockerfile: docker/dev-logiztik/Dockerfile_81
     volumes:
       - ../../app:/var/www/html
     container_name: php-fpm-logiztik

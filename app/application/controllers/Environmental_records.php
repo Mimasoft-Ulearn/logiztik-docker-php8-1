@@ -1698,7 +1698,7 @@ class Environmental_records extends MY_Controller {
 					}
 				}
 				
-				$fecha_modificacion = ($record_info->modified > max($arrayFechas)) ? $record_info->modified : max($arrayFechas);
+				//$fecha_modificacion = ($record_info->modified > max($arrayFechas)) ? $record_info->modified : max($arrayFechas);
 				$view_data["fecha_modificacion"] = $fecha_modificacion;
 
                 $this->template->rander("environmental_records/records/index", $view_data);

@@ -785,7 +785,10 @@ class Dashboard extends MY_Controller {
 							
 							$valor = $datos_decoded["unidad_residuo"];
 
-							$array_id_materiales_valores[$mat_rel_cat->id_material][$mat_rel_cat->id_categoria][$agno][$mes] += $valor * $valor_transformacion;
+                            $valor = (float)$valor;
+                            $valor_transformacion = (float)$valor_transformacion;
+
+                            $array_id_materiales_valores[$mat_rel_cat->id_material][$mat_rel_cat->id_categoria][$agno][$mes] += $valor * $valor_transformacion;
 							
 						}
 					}

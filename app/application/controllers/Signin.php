@@ -2,12 +2,19 @@
 
 class Signin extends CI_Controller {
 
+    public $login_user;
+    public $login_user_id;
+
     function __construct() {
         parent::__construct();
         $this->load->helper('email');
+        $this->load->model('Users_model');
+        $this->login_user_id=$this->Users_model->login_user_id();
     }
 
     function index($disabled = "") {
+
+        $language = $this->input->post("language") ?? 'es';
         if ($this->Users_model->login_user_id()) {
 			redirect('home');
         } else {
@@ -40,6 +47,7 @@ class Signin extends CI_Controller {
                 $this->load->view('signin/index', $view_data);
             } else {
 
+                $this->login_user = $this->Users_model->get_access_info($this->login_user);
                 if ($view_data["redirect"] && $this->login_user->user_type === "staff") {
                     redirect($view_data["redirect"]);
                 } else {
@@ -114,20 +122,20 @@ class Signin extends CI_Controller {
         if (get_setting("re_captcha_secret_key")) {
 
             $response = $this->is_valid_recaptcha($this->input->post("g-recaptcha-response"));
-       
+
             if ($response !== true) {
-                
+
                 if($response){
                     echo json_encode(array('success' => false, 'message' => lang("re_captcha_error-" . $response) ));
                 }else{
                     echo json_encode(array('success' => false, 'message' => lang("re_captcha_expired") ));
                 }
-                
+
                 return false;
             }
         }
 
-        
+
 
         $email = $this->input->post("email");
         $existing_user = $this->Users_model->is_email_exists($email);

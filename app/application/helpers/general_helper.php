@@ -197,6 +197,11 @@ if (!function_exists('active_menu')) {
         $ci = & get_instance();
         $controller_name = strtolower(get_class($ci));
 
+        //asegurar que $submenu es un array
+        if(!is_array($submenu)) {
+            $submenu = [];
+        }
+
         //compare with controller name. if not found, check in submenu values
         if ($menu === $controller_name) {
             return "active";

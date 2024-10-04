@@ -6,7 +6,7 @@
  *
  * This content is released under the MIT License (MIT)
  *
- * Copyright (c) 2014 - 2017, British Columbia Institute of Technology
+ * Copyright (c) 2019 - 2022, CodeIgniter Foundation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,9 @@
  * @package	CodeIgniter
  * @author	EllisLab Dev Team
  * @copyright	Copyright (c) 2008 - 2014, EllisLab, Inc. (https://ellislab.com/)
- * @copyright	Copyright (c) 2014 - 2017, British Columbia Institute of Technology (http://bcit.ca/)
- * @license	http://opensource.org/licenses/MIT	MIT License
+ * @copyright	Copyright (c) 2014 - 2019, British Columbia Institute of Technology (https://bcit.ca/)
+ * @copyright	Copyright (c) 2019 - 2022, CodeIgniter Foundation (https://codeigniter.com/)
+ * @license	https://opensource.org/licenses/MIT	MIT License
  * @link	https://codeigniter.com
  * @since	Version 1.0.0
  * @filesource
@@ -44,7 +45,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @subpackage	Helpers
  * @category	Helpers
  * @author		EllisLab Dev Team
- * @link		https://codeigniter.com/user_guide/helpers/form_helper.html
+ * @link		https://codeigniter.com/userguide3/helpers/form_helper.html
  */
 
 // ------------------------------------------------------------------------
@@ -336,7 +337,7 @@ if ( ! function_exists('form_multiselect'))
 	 * @param	mixed
 	 * @return	string
 	 */
-	function form_multiselect($name = '', $options = array(), $selected = array(), $extra = '', $disabled = array(), $locked = array())
+	function form_multiselect($name = '', $options = array(), $selected = array(), $extra = '')
 	{
 		$extra = _attributes_to_string($extra);
 		if (stripos($extra, 'multiple') === FALSE)
@@ -344,7 +345,7 @@ if ( ! function_exists('form_multiselect'))
 			$extra .= ' multiple="multiple"';
 		}
 
-		return form_dropdown($name, $options, $selected, $extra, $disabled, $locked);
+		return form_dropdown($name, $options, $selected, $extra);
 	}
 }
 
@@ -361,7 +362,7 @@ if ( ! function_exists('form_dropdown'))
 	 * @param	mixed	$extra
 	 * @return	string
 	 */
-	function form_dropdown($data = '', $options = array(), $selected = array(), $extra = '', $disabled = array(), $locked = array())
+	function form_dropdown($data = '', $options = array(), $selected = array(), $extra = '')
 	{
 		$defaults = array();
 
@@ -386,10 +387,6 @@ if ( ! function_exists('form_dropdown'))
 
 		is_array($selected) OR $selected = array($selected);
 		is_array($options) OR $options = array($options);
-		
-		is_array($disabled) OR $disabled = array($disabled);
-		
-		is_array($locked) OR $locked = array($disabled);
 
 		// If no selected state was submitted we will attempt to set it automatically
 		if (empty($selected))
@@ -438,7 +435,7 @@ if ( ! function_exists('form_dropdown'))
 			else
 			{
 				$form .= '<option value="'.html_escape($key).'"'
-					.(in_array($key, $selected) ? ' selected="selected"' : '').' '.(in_array($key, $disabled) ? ' disabled="disabled"' : '').' '.(in_array($key, $locked) ? ' locked="locked"' : '').'>'
+					.(in_array($key, $selected) ? ' selected="selected"' : '').'>'
 					.(string) $val."</option>\n";
 			}
 		}
@@ -601,7 +598,7 @@ if ( ! function_exists('form_label'))
 	 *
 	 * @param	string	The text to appear onscreen
 	 * @param	string	The id the label applies to
-	 * @param	array	Additional attributes
+	 * @param	mixed	Additional attributes
 	 * @return	string
 	 */
 	function form_label($label_text = '', $id = '', $attributes = array())
@@ -614,13 +611,7 @@ if ( ! function_exists('form_label'))
 			$label .= ' for="'.$id.'"';
 		}
 
-		if (is_array($attributes) && count($attributes) > 0)
-		{
-			foreach ($attributes as $key => $val)
-			{
-				$label .= ' '.$key.'="'.$val.'"';
-			}
-		}
+		$label .= _attributes_to_string($attributes);
 
 		return $label.'>'.$label_text.'</label>';
 	}
@@ -657,7 +648,6 @@ if ( ! function_exists('form_fieldset'))
 if ( ! function_exists('form_fieldset_close'))
 {
 	/**
-
 	 * Fieldset Close Tag
 	 *
 	 * @param	string

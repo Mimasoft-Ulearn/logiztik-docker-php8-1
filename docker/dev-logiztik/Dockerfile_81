@@ -1,0 +1,162 @@
+#
+#--------------------------------------------------------------------------
+# Image Setup
+#--------------------------------------------------------------------------
+#
+
+FROM php:8.1-fpm
+
+# Set Environment Variables
+ENV DEBIAN_FRONTEND=noninteractive
+
+#
+#--------------------------------------------------------------------------
+# Software's Installation
+#--------------------------------------------------------------------------
+#
+# Installing tools and PHP extentions using "apt", "docker-php", "pecl",
+#
+
+# Install "curl", "libmemcached-dev", "libpq-dev", "libjpeg-dev",
+#         "libpng-dev", "libfreetype6-dev", "libssl-dev", "libmcrypt-dev",
+RUN set -eux; \
+  apt-get update; \
+  apt-get install -y --no-install-recommends \
+  curl \
+  libjpeg-dev \
+  libpng-dev \
+  libfreetype6-dev \
+  libssl-dev \
+  libwebp-dev \
+  libxpm-dev \
+  libmcrypt-dev \
+  libonig-dev \
+  libzip-dev \
+  libbz2-dev \
+  libicu-dev \
+  libpspell-dev \
+  libxml2-dev \
+  libsqlite3-dev \
+  libpq-dev \
+  libldap2-dev \
+  libc-client-dev \
+  libkrb5-dev \
+  libxslt-dev \
+  libmemcached-dev \
+  libgmp-dev \
+  telnet ; \
+  docker-php-ext-install pdo_mysql pdo_pgsql pdo_sqlite gd zip; \
+  docker-php-ext-install -j$(nproc) mysqli mbstring bcmath bz2; \
+  docker-php-ext-install exif gettext intl pcntl pspell soap; \
+  rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+    # Install the PHP gd library
+    docker-php-ext-configure gd \
+            --prefix=/usr \
+            --with-jpeg \
+            --with-webp \
+            --with-xpm \
+            --with-freetype; \
+    docker-php-ext-install gd; \
+    #Instalar extensiones de PHP
+    docker-php-ext-install -j$(nproc) mysqli gd mbstring zip bcmath bz2 calendar exif gettext intl pcntl pspell soap sockets pdo_mysql pdo_sqlite
+    
+RUN php -r 'var_dump(gd_info());'
+
+# Instalamos mcrypt (compatible con PHP 8.0)
+RUN pecl install mcrypt-1.0.7 && docker-php-ext-enable mcrypt
+
+# Instalar Xdebug (compatible con PHP 8.1)
+RUN pecl install xdebug && docker-php-ext-enable xdebug
+
+# Configurar Xdebug
+RUN mkdir -p /var/log/xdebug/profiler && \
+    chmod -R 777 /var/log/xdebug && \
+    touch /var/log/xdebug.log && \
+    chmod 666 /var/log/xdebug.log
+
+# Instalar Memcached (compatible con PHP 8.0)
+RUN pecl install memcached && docker-php-ext-enable memcached
+
+# Configurar la zona horaria
+ENV TZ=America/Santiago
+RUN ln -sf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+
+# Configurar Opcache
+RUN { \
+  echo 'opcache.enable=1'; \
+  echo 'opcache.enable_cli=1'; \
+  echo 'opcache.memory_consumption=512'; \
+  echo 'opcache.max_accelerated_files=40000'; \
+  echo 'opcache.revalidate_freq=0'; \
+  echo 'opcache.validate_timestamps=0'; \
+  echo 'opcache.save_comments=1'; \
+  echo 'opcache.enable_file_override=1'; \
+  echo 'opcache.interned_strings_buffer=16'; \
+  echo 'opcache.fast_shutdown=1'; \
+  echo 'opcache.max_wasted_percentage=5'; \
+  echo 'opcache.consistency_checks=0'; \
+  echo 'opcache.huge_code_pages=1'; \
+  } > /usr/local/etc/php/conf.d/opcache.ini
+
+# Desactivar JIT (Opcional, comenta o elimina si deseas activarlo)
+RUN { \
+  echo 'opcache.jit=1'; \
+  echo 'opcache.jit_buffer_size=512M'; \
+  echo 'opcache.jit=tracing'; \
+  } >> /usr/local/etc/php/conf.d/opcache.ini
+
+# Configurar Xdebug para perfilado
+RUN { \
+        echo '[xdebug]'; \
+        echo 'xdebug.mode=debug'; \
+        echo 'xdebug.start_with_request=yes'; \
+        echo 'xdebug.client_host=host.docker.internal'; \
+        echo 'xdebug.client_port=9003'; \
+        echo 'xdebug.log=/var/log/xdebug.log'; \
+        echo 'xdebug.trigger_enable=1'; \
+        echo 'xdebug.output_dir=/var/log/xdebug/profiler'; \
+        } > /usr/local/etc/php/conf.d/xdebug.ini
+
+# Configurar PHP-FPM
+RUN { \
+  echo '[global]'; \
+  echo 'error_log = /proc/self/fd/2'; \
+  echo 'process.max = 300'; \
+  echo 'rlimit_files = 65536'; \
+  echo '[www]'; \
+  echo 'listen = 9000'; \
+  echo 'pm = dynamic'; \
+  echo 'pm.max_children = 240'; \
+  echo 'pm.start_servers = 20'; \
+  echo 'pm.min_spare_servers = 10'; \
+  echo 'pm.max_spare_servers = 30'; \
+  echo 'pm.max_requests = 1000'; \
+  echo 'request_terminate_timeout = 300s'; \
+  echo 'rlimit_files = 65536'; \
+  echo 'rlimit_core = unlimited'; \
+  echo 'catch_workers_output = yes'; \
+  echo 'user = www-data'; \
+  echo 'group = www-data'; \
+  } > /usr/local/etc/php-fpm.d/www.conf
+
+# Customizamos el php.ini para que deje usar más recursos
+RUN { \
+  echo 'memory_limit=4096M'; \
+  echo 'upload_max_filesize=100M'; \
+  echo 'post_max_size=100M'; \
+  echo 'max_execution_time=300'; \
+  echo 'date.timezone="America/Santiago"'; \
+  } > /usr/local/etc/php/conf.d/custom.ini
+
+# Configurar permisos (ajusta 'www-data' si es necesario)
+RUN usermod -u 1000 www-data && groupmod -g 1000 www-data
+RUN touch /tmp/xdebug.log
+RUN chmod 777 /tmp
+
+# Copiar la aplicación al contenedor y ajustar permisos
+COPY --chown=www-data:www-data ../../app /var/www/html
+RUN find /var/www/html -type d -exec chmod 755 {} \; && \
+  find /var/www/html -type f -exec chmod 644 {} \;

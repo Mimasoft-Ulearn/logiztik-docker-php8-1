@@ -4224,6 +4224,7 @@ class Setting_bulk_load extends MY_Controller {
 
     function get_intructions() {
         //$this->access_only_allowed_members();
+        $view_data = array();
 		$html = $this->load->view('setting_bulk_load/intructions', $view_data, true);
 		echo $html;
     }
