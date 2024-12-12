@@ -562,3 +562,27 @@ $config['proxy_ips'] = '';
   |
   | 
  */
+/*
+    |--------------------------------------------------------------------------
+    | redis
+    |--------------------------------------------------------------------------
+    |
+    | Esta configuración permite usar redis como cache de aplicación.
+    | Si está configurado, se usará la cache de Memcached en lugar de la
+    | cache de Redis.
+    |
+    | Si está configurado, debe especificar la configuración de la cache
+    | de redis. Esta configuración se puede encontrar en el archivo
+    | "docker/dev/redis.conf".
+    |
+ */
+$config['cache_driver'] = 'redis';
+$config['cache_backup'] = 'file';
+/*
+  |--------------------------------------------------------------------------
+  |
+  |--------------------------------------------------------------------------
+  |
+  |
+  |
+ */

@@ -27,6 +27,6 @@
 	AppHelper.settings.dateFormatClient = "<?php echo get_setting_client_mimasoft($this->login_user->client_id, "date_format"); ?>";
 	//AppHelper.highchartsExportUrl = "https://highchart.mimasoft.cl:39095";
 	//AppHelper.highchartsExportUrl = "https://highcharts.enel.mimasoft.cl:39095";
-	AppHelper.highchartsExportUrl = "https://dev.highcharts.mimasoft.cl:4001";
-	AppHelper.highchartsExportUrlQuery = "https://dev.highcharts.mimasoft.cl";
+	AppHelper.highchartsExportUrl = "http://dev.highcharts.mimasoft.cl:4001";
+	AppHelper.highchartsExportUrlQuery = "http://dev.highcharts.mimasoft.cl";
 </script>

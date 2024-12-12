@@ -9,7 +9,7 @@ class Signin extends CI_Controller {
         parent::__construct();
         $this->load->helper('email');
         $this->load->model('Users_model');
-        $this->login_user_id=$this->Users_model->login_user_id();
+
     }
 
     function index($disabled = "") {
@@ -46,7 +46,7 @@ class Signin extends CI_Controller {
 
                 $this->load->view('signin/index', $view_data);
             } else {
-
+                $this->login_user_id=$this->Users_model->login_user_id();
                 $this->login_user = $this->Users_model->get_access_info($this->login_user);
                 if ($view_data["redirect"] && $this->login_user->user_type === "staff") {
                     redirect($view_data["redirect"]);

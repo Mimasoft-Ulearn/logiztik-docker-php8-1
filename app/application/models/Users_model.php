@@ -171,23 +171,57 @@ class Users_model extends Crud_model {
         return $this->db->query($sql);
     }
 
+
     function get_access_info($user_id = 0) {
         $users_table = $this->db->dbprefix('users');
         $roles_table = $this->db->dbprefix('roles');
         $team_table = $this->db->dbprefix('team');
 
-		 $sql = "SELECT $users_table.id, $users_table.user_type, $users_table.is_admin, $users_table.role_id, $users_table.email,
+        $sql = "SELECT $users_table.id, $users_table.user_type, $users_table.is_admin, $users_table.role_id, $users_table.email,
             $users_table.first_name, $users_table.last_name, $users_table.image, $users_table.message_checked_at, 
-			$users_table.notification_checked_at, $users_table.alert_checked_at, $users_table.client_id,
+            $users_table.notification_checked_at, $users_table.alert_checked_at, $users_table.client_id,
             $users_table.is_primary_contact, $users_table.sticky_note,
             $roles_table.title as role_title, $roles_table.permissions,
             (SELECT GROUP_CONCAT(id) team_ids FROM $team_table WHERE FIND_IN_SET('$user_id', `members`)) as team_ids
         FROM $users_table
         LEFT JOIN $roles_table ON $roles_table.id = $users_table.role_id AND $roles_table.deleted = 0
         WHERE $users_table.deleted=0 AND $users_table.id=$user_id";
-		
-        return $this->db->query($sql)->row();
+
+        $query = $this->db->query($sql);
+
+        // Verificar si la consulta fue exitosa
+        if ($query) {
+            // Verificar si se encontraron resultados
+            if ($query->num_rows() > 0) {
+                return $query->row();  // Retornar la fila de resultados
+            } else {
+                return null;  // O un mensaje que indique que no se encontraron resultados
+            }
+        } else {
+            // Si hubo un error con la consulta, puedes manejarlo aquí
+            $error = $this->db->error();  // Mostrar error de base de datos para depuración
+            log_message('error', 'Error en la consulta SQL: ' . json_encode($error));
+            return false;  // Retornar false para indicar que hubo un error
+        }
     }
+
+    /*  function get_access_info($user_id = 0) {
+          $users_table = $this->db->dbprefix('users');
+          $roles_table = $this->db->dbprefix('roles');
+          $team_table = $this->db->dbprefix('team');
+
+           $sql = "SELECT $users_table.id, $users_table.user_type, $users_table.is_admin, $users_table.role_id, $users_table.email,
+              $users_table.first_name, $users_table.last_name, $users_table.image, $users_table.message_checked_at,
+              $users_table.notification_checked_at, $users_table.alert_checked_at, $users_table.client_id,
+              $users_table.is_primary_contact, $users_table.sticky_note,
+              $roles_table.title as role_title, $roles_table.permissions,
+              (SELECT GROUP_CONCAT(id) team_ids FROM $team_table WHERE FIND_IN_SET('$user_id', `members`)) as team_ids
+          FROM $users_table
+          LEFT JOIN $roles_table ON $roles_table.id = $users_table.role_id AND $roles_table.deleted = 0
+          WHERE $users_table.deleted=0 AND $users_table.id=$user_id";
+
+          return $this->db->query($sql)->row();
+      }*/
 
     function get_team_members_and_clients($user_type = "", $user_ids = "", $exlclude_user = 0) {
 
